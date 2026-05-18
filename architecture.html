@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Portico · Banking Architecture</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:#060912;color:#e2e8f0;font-family:'DM Mono','Fira Code',monospace;min-height:100vh;}
+  ::-webkit-scrollbar{width:3px;height:3px;}
+  ::-webkit-scrollbar-track{background:#0d1117;}
+  ::-webkit-scrollbar-thumb{background:#1e293b;border-radius:2px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+  .fade-up{animation:fadeUp 0.35s ease forwards;}
+  .node:hover{filter:brightness(1.2);transform:translateY(-2px);transition:all 0.15s ease;}
+  .tab-btn:hover{color:#94a3b8!important;}
+  .layer-card:hover{background:rgba(255,255,255,0.04)!important;cursor:pointer;}
+  .domain-btn:hover{opacity:1!important;}
+  .sys-card{transition:transform 0.2s;}
+  .sys-card:hover{transform:translateY(-3px);}
+  .feature-card{transition:all 0.2s;}
+  .feature-card:hover{background:rgba(99,102,241,0.08)!important;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const DOMAINS = [
+  {
+    id:"onboarding",num:"01",label:"Client Onboarding",icon:"👤",
+    color:"#10b981",glow:"rgba(16,185,129,0.25)",
+    tagline:"Who is the customer?",
+    desc:"The bank's first and most regulated domain. KYC, KYB, EDD — Portico orchestrates the full identity and compliance journey for the RM.",
+    layers:[
+      {name:"Digital Front Door (Portico)",items:["RM/Advisor Login Dashboard","Client Profile Creation","Document Upload Portal","Application Progress Tracker","Onboarding Checklist"]},
+      {name:"Identity & Verification",items:["KYC — Individual (Retail)","KYB — Business Entity (Commercial)","EDD — Enhanced Due Diligence","Beneficial Ownership (FinCEN CDD)","PEP / Adverse Media Screening"]},
+      {name:"Compliance & Risk",items:["OFAC / Sanctions Screening","AML Risk Scoring (Low/Med/High)","ChexSystems / EWS (Retail)","SOS Entity Verification (Biz)","Customer Risk Rating (CRR)"]},
+      {name:"Systems",items:["Jumio / Socure / Persona (ID Verify)","Alloy / Unit21 (KYC Orchestration)","ComplyAdvantage (Sanctions)","NICE Actimize (AML)","Middesk / D&B (KYB)"]},
+    ],
+    kpis:["Speed-to-Funded Account < 5 min","Auto-Approval Rate > 80%","KYC False Positive < 5%","Completion Rate > 70%"],
+    regs:["FinCEN BSA/AML","OFAC SDN List","OCC CIP Rule","FinCEN CDD Rule"]
+  },
+  {
+    id:"product",num:"02",label:"Product Onboarding",icon:"📦",
+    color:"#3b82f6",glow:"rgba(59,130,246,0.25)",
+    tagline:"What does the customer need?",
+    desc:"Two tracks: Bank creates & configures the product (Track A), then the RM guides the customer to the right product through Portico (Track B).",
+    layers:[
+      {name:"Track A — Bank Product Creation",items:["Product Concept & PRD","Regulatory Approval (OCC)","ALCO Pricing Committee","Core Banking Configuration","Digital Build & Ops Readiness"]},
+      {name:"Track B — Customer Journey via Portico",items:["Needs Assessment by RM","Product Recommendation Engine","Eligibility & Pre-Qualification","Application & Underwriting","E-Sign + Disclosure (TILA/Reg E)"]},
+      {name:"All Banking Verticals",items:["Retail: Checking, Savings, MMA, CD","Cards: Secured / Rewards / Premium / Co-brand","Loans: Personal, Auto, Mortgage, Student","Commercial: C&I, CRE, SBA, ABL, Trade Finance","Wealth: Advisory, Brokerage, Trust, Annuities"]},
+      {name:"Systems",items:["nCino (Loan Origination)","Encompass / Blend (Mortgage)","MeridianLink (Decisioning)","DocuSign (E-Sign)","Temenos / FIS (Core Banking Config)"]},
+    ],
+    kpis:["Product Adoption per Customer","App-to-Close Time","Cross-Sell Products per HH > 3","RM Conversion Rate"],
+    regs:["CFPB Reg Z / Reg E","TILA Disclosures","ECOA / Reg B","OCC Product Approval"]
+  },
+  {
+    id:"wires",num:"03",label:"Wires & Payments",icon:"⚡",
+    color:"#f59e0b",glow:"rgba(245,158,11,0.25)",
+    tagline:"How does money move?",
+    desc:"Every dollar moving in or out uses one of 8+ rails. Portico gives RMs real-time visibility into client payment activity, wire status, and exceptions.",
+    layers:[
+      {name:"Outgoing (Originated by Bank)",items:["Fedwire (RTGS — Large Value, Irrevocable)","ACH Standard (T+1, Payroll/Vendor)","Same-Day ACH (3 windows: 10:30/2:45/4:45 ET)","RTP / FedNow (Instant, < 10 seconds)","SWIFT MT103 (International via Nostro/Vostro)"]},
+      {name:"Incoming (Received by Bank)",items:["Fedwire Receipt → Fed Master Account","ACH Credit (RDFI — Direct Deposit)","SWIFT Incoming MT103 → Validate → Post","RTP / FedNow Incoming (Instant Credit)","Check 21 / Remote Deposit Capture"]},
+      {name:"Cross-Platform Connectivity",items:["Visa / Mastercard Network (Card Auth)","Zelle (EWS — P2P over RTP rails)","CHIPS (Large-value netting via TCH)","FX / SWIFT GPI (Real-time tracking)","Correspondent Banking (Nostro / Vostro)"]},
+      {name:"Risk & Compliance Controls",items:["OFAC Real-time Sanctions (< 500ms)","Fraud Scoring ML Engine (< 100ms)","Dual Control / Callback Verify (Wire > $50K)","CTR > $10K Auto-filing (FinCEN)","AML Transaction Monitoring + SAR Filing"]},
+      {name:"Systems",items:["FedLine Advantage (Fed Connection)","Payment Hub (Temenos / ACI / FIS PayCenter)","SWIFT Alliance Access","NICE Actimize (Fraud + AML)","NACHA ACH Operator (FedACH / EPN)"]},
+    ],
+    kpis:["Payment Success Rate > 99%","Wire Exception Rate < 0.1%","OFAC Screen Latency < 500ms","Fraud Loss < 0.01% GMV"],
+    regs:["Fedwire / Reg J","NACHA Rules","SWIFT Compliance","OFAC / FinCEN BSA","CFPB Reg E"]
+  },
+  {
+    id:"retention",num:"04",label:"Retention & Exit",icon:"🔄",
+    color:"#8b5cf6",glow:"rgba(139,92,246,0.25)",
+    tagline:"How do we keep clients & manage liquidity?",
+    desc:"Two meanings: keeping customers loyal (CRM + NBA), and keeping the bank solvent when deposits leave (ALM + LCR). Both are Portico use cases.",
+    layers:[
+      {name:"Customer Retention (RM Tools in Portico)",items:["Churn Prediction Score (ML, monthly)","Next Best Action (NBA) Engine","Relationship Profitability Dashboard","Life Event Triggers (Marriage/Home/Retirement)","NPS Survey + Detractor Escalation"]},
+      {name:"Cross-Sell & Deepening",items:["Product Recommendation by Life Stage","Proactive Rate Match Offers","Digital Upgrade Nudges (Free → Premium)","RM Outreach Triggers (Low App Login)","Loyalty: Relationship Pricing + Rewards"]},
+      {name:"Liquidity Management (Bank-Side)",items:["LCR (Liquidity Coverage Ratio > 100%)","NSFR (Net Stable Funding Ratio > 100%)","Deposit Concentration Monitoring","ALM / ALCO Stress Testing","FHLB / Fed Discount Window Access"]},
+      {name:"Exit / Account Closure",items:["Voluntary Exit: Save Offer → Retention Attempt","Balance Disbursement (ACH / Wire / Check)","Account Closure in CBS (7-yr data retention)","SAR Filing if AML-triggered exit","Win-Back Campaign (6 months post-closure)"]},
+      {name:"Systems",items:["Salesforce FSC (CRM + NBA)","Pega / Einstein (Next Best Action)","QRM / Finastra (ALM / Treasury)","Qualtrics / Medallia (NPS)","Core Banking (Account Closure Workflow)"]},
+    ],
+    kpis:["Deposit Attrition < 5% YoY","NPS > 55","Products per Household > 3.5","LCR > 110%"],
+    regs:["Basel III LCR / NSFR","FDIC Deposit Insurance","Fed Reserve Requirements","CFPB Exit Rules / Reg E"]
+  }
+];
+
+const BACKEND = [
+  {name:"Core Banking System (CBS)",icon:"🏦",desc:"FIS / Jack Henry / Temenos. Ledger of record: accounts, balances, transactions, interest, GL.",color:"#0891b2"},
+  {name:"CRM — Salesforce FSC",icon:"👥",desc:"Customer 360: products held, interactions, LTV, churn score, RM notes, campaign responses.",color:"#1d4ed8"},
+  {name:"ERP — SAP S/4HANA",icon:"📊",desc:"Finance: GL, AP/AR, GST. Procurement. Supply chain. HR & Payroll. Financial reporting.",color:"#7c3aed"},
+  {name:"KYC/AML Platform",icon:"🔒",desc:"NICE Actimize / Oracle FCCM. Transaction monitoring, SAR/CTR, OFAC screening, case mgmt.",color:"#b91c1c"},
+  {name:"Payment Hub",icon:"⚡",desc:"Temenos Payments / ACI. Central routing for all rails: ACH, Fedwire, SWIFT, RTP, FedNow.",color:"#b45309"},
+  {name:"Digital Banking Platform",icon:"📱",desc:"Q2 / Backbase. Customer-facing web + mobile. Portico is the RM-facing counterpart.",color:"#15803d"},
+  {name:"Loan Origination (LOS)",icon:"📋",desc:"nCino (commercial) + Encompass (mortgage). Full loan lifecycle from application to closing.",color:"#0f766e"},
+  {name:"Data & ML Platform",icon:"🧠",desc:"Snowflake + Databricks. Churn prediction, fraud models, NBA engine, regulatory reporting.",color:"#9d174d"},
+  {name:"API Gateway",icon:"🔌",desc:"Kong / AWS API GW. Central entry for all systems + fintech partners. Auth, rate limit, routing.",color:"#334155"},
+  {name:"Card Management System",icon:"💳",desc:"i2c / TSYS / Marqeta. Full card lifecycle: issuance, auth, rewards, disputes, statements.",color:"#6d28d9"},
+];
+
+const FKMAP = [
+  ["🛒 Flipkart Catalog Service","🏦 Core Banking System (CBS)","Source of truth for all products & accounts"],
+  ["🛒 Flipkart CRM","🏦 Salesforce FSC (CRM)","Customer 360 — products, interactions, LTV"],
+  ["🛒 Flipkart ERP (SAP)","🏦 Bank ERP (SAP S/4HANA)","Finance: GL, AP/AR, payroll, GST"],
+  ["🛒 Flipkart Search Engine","🏦 Product Recommendation Engine","Right product for right client at right time"],
+  ["🛒 Flipkart OMS","🏦 Loan Origination System (LOS)","Application → Underwriting → Approval → Funding"],
+  ["🛒 Flipkart Payment Gateway","🏦 Payment Hub (Fedwire/ACH/SWIFT)","Money movement across all rails"],
+  ["🛒 Flipkart Fraud Detection","🏦 AML/KYC Platform (Actimize)","Real-time risk: fraud + compliance + sanctions"],
+  ["🛒 Flipkart Notifications","🏦 CRM + Portico Alerts","Proactive RM and client alerts for all events"],
+  ["🛒 Flipkart API Gateway","🏦 Banking API Gateway (Kong)","Central entry for Portico + all integrations"],
+  ["🛒 Flipkart Data Platform","🏦 Snowflake + Databricks","Analytics, ML models, regulatory reporting"],
+  ["🛒 Flipkart Seller Hub","🏦 Portico (RM Dashboard)","The internal operator's command centre"],
+  ["🛒 Flipkart Ekart","🏦 Treasury Ops (Payments)","Physically moving value — securely, at scale"],
+];
+
+const PORTICO_FEATURES = [
+  {icon:"👤",title:"Client Profile Hub",desc:"360° view of every client: products, KYC status, risk rating, interaction history, documents, next best actions — all in one screen for the RM."},
+  {icon:"✅",title:"Onboarding Orchestrator",desc:"Step-by-step guided onboarding workflow. KYC checks fire in the background. RM sees real-time status: ID verified ✓, sanctions clean ✓, risk rated ✓."},
+  {icon:"📦",title:"Product Recommendation",desc:"ML-powered product suggester based on client life stage, financial profile, and relationship gaps. RM gets 'Next Best Product' with rationale."},
+  {icon:"⚡",title:"Payment Monitor",desc:"Live wire tracking, ACH batch status, exception queue. RM can see every pending/completed payment for their clients without calling back-office."},
+  {icon:"🔔",title:"Retention Alerts",desc:"Proactive churn risk alerts: 'Client X balance dropped 40% this month.' Life event triggers: 'Client Y just changed address — mortgage opportunity?'"},
+  {icon:"📊",title:"Relationship P&L",desc:"Revenue per client: NIM + fees + card interchange + wealth AUM. Shows RM which relationships need deepening and which are at risk."},
+];
+
+function App() {
+  const [tab, setTab] = useState("map");
+  const [dom, setDom] = useState("onboarding");
+  const [openLayer, setOpenLayer] = useState(null);
+  const d = DOMAINS.find(x => x.id === dom);
+
+  const tabs = [
+    {id:"map",label:"🗺  Architecture Map"},
+    {id:"domains",label:"🔍  4 Domains Deep Dive"},
+    {id:"portico",label:"⚡  Portico — RM App"},
+    {id:"backend",label:"🏗  Backend Systems"},
+  ];
+
+  return (
+    <div style={{fontFamily:"'DM Mono','Fira Code',monospace",background:"#060912",minHeight:"100vh",color:"#e2e8f0"}}>
+      {/* HEADER */}
+      <div style={{background:"linear-gradient(180deg,#0a0f1e,#060912)",borderBottom:"1px solid rgba(255,255,255,0.06)",padding:"16px 24px",position:"sticky",top:0,zIndex:100}}>
+        <div style={{maxWidth:1280,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:10}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
+              <div style={{width:7,height:7,borderRadius:"50%",background:"#10b981",boxShadow:"0 0 10px #10b981",animation:"pulse 2.5s infinite"}}/>
+              <span style={{color:"#10b981",fontSize:9,letterSpacing:"3px",textTransform:"uppercase"}}>Product Intern · Mentor Session</span>
+            </div>
+            <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,background:"linear-gradient(90deg,#fff 40%,#6366f1)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+              Banking Architecture · Portico
+            </div>
+          </div>
+          <div style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:6,padding:"5px 12px",fontSize:10,color:"#818cf8",letterSpacing:"0.5px"}}>
+            Client Onboarding · Product · Wires · Retention
+          </div>
+        </div>
+      </div>
+
+      {/* TABS */}
+      <div style={{background:"#08091a",borderBottom:"1px solid rgba(255,255,255,0.05)",padding:"0 24px",overflowX:"auto"}}>
+        <div style={{maxWidth:1280,margin:"0 auto",display:"flex",whiteSpace:"nowrap"}}>
+          {tabs.map(t=>(
+            <button key={t.id} className="tab-btn" onClick={()=>{setTab(t.id);setOpenLayer(null);}}
+              style={{background:"none",border:"none",cursor:"pointer",padding:"12px 16px",fontFamily:"inherit",color:tab===t.id?"#6366f1":"#475569",borderBottom:tab===t.id?"2px solid #6366f1":"2px solid transparent",fontSize:11,letterSpacing:"0.5px",transition:"color 0.2s"}}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{maxWidth:1280,margin:"0 auto",padding:"20px 24px 60px"}}>
+
+        {/* ── TAB 1: MAP ── */}
+        {tab==="map" && (
+          <div className="fade-up">
+            {/* Portico box */}
+            <div style={{textAlign:"center",marginBottom:20}}>
+              <div style={{display:"inline-block",background:"linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1))",border:"2px solid rgba(99,102,241,0.5)",borderRadius:14,padding:"16px 40px",boxShadow:"0 0 40px rgba(99,102,241,0.15)"}}>
+                <div style={{fontSize:26,marginBottom:4}}>⚡</div>
+                <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#818cf8",letterSpacing:1}}>PORTICO</div>
+                <div style={{fontSize:10,color:"#475569",marginTop:2,letterSpacing:"1.5px"}}>RM & ADVISOR DIGITAL ONBOARDING APP</div>
+                <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8,flexWrap:"wrap"}}>
+                  {["Client 360","KYC Orchestrator","Product Recommender","Payment Monitor","Retention Alerts"].map(f=>(
+                    <span key={f} style={{background:"rgba(99,102,241,0.15)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:3,padding:"2px 7px",fontSize:9,color:"#a5b4fc"}}>{f}</span>
+                  ))}
+                </div>
+              </div>
+              <div style={{display:"flex",justifyContent:"center",gap:0}}>
+                {DOMAINS.map(d=>(
+                  <div key={d.id} style={{width:"25%",display:"flex",justifyContent:"center"}}>
+                    <div style={{width:1,height:24,background:`linear-gradient(180deg,rgba(99,102,241,0.6),${d.color})`}}/>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 4 Domain columns */}
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:10}}>
+              {DOMAINS.map(d=>(
+                <div key={d.id} style={{background:"#0b0f1e",border:`1px solid ${d.color}30`,borderTop:`3px solid ${d.color}`,borderRadius:10,overflow:"hidden"}}>
+                  <div style={{background:`linear-gradient(135deg,${d.color}15,transparent)`,padding:"12px 14px",borderBottom:`1px solid ${d.color}20`}}>
+                    <div style={{fontSize:8,color:d.color,letterSpacing:"2px",marginBottom:3}}>DOMAIN {d.num}</div>
+                    <div style={{fontSize:20,marginBottom:3}}>{d.icon}</div>
+                    <div style={{fontSize:12,fontWeight:600,color:"#e2e8f0",lineHeight:1.3}}>{d.label}</div>
+                    <div style={{fontSize:9,color:"#64748b",marginTop:2,fontStyle:"italic"}}>{d.tagline}</div>
+                  </div>
+                  <div style={{padding:"8px 10px"}}>
+                    {d.layers.map((l,li)=>(
+                      <div key={li} style={{background:`${d.color}07`,border:`1px solid ${d.color}15`,borderRadius:5,padding:"7px 9px",marginBottom:5}}>
+                        <div style={{fontSize:8,color:d.color,fontWeight:600,marginBottom:4,letterSpacing:"0.5px",textTransform:"uppercase"}}>{l.name}</div>
+                        {l.items.map((item,ii)=>(
+                          <div key={ii} style={{display:"flex",gap:4,alignItems:"flex-start",marginBottom:2}}>
+                            <span style={{color:d.color,fontSize:7,marginTop:3,flexShrink:0}}>▶</span>
+                            <span style={{fontSize:9,color:"#64748b",lineHeight:1.5}}>{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    <div style={{background:"rgba(0,0,0,0.3)",borderRadius:5,padding:"7px 9px",marginTop:6,border:`1px solid ${d.color}15`}}>
+                      <div style={{fontSize:8,color:"#334155",marginBottom:4,letterSpacing:"1px",textTransform:"uppercase"}}>KPIs</div>
+                      {d.kpis.map((k,ki)=>(
+                        <div key={ki} style={{fontSize:9,color:"#475569",marginBottom:2}}><span style={{color:d.color}}>→ </span>{k}</div>
+                      ))}
+                    </div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:6}}>
+                      {d.regs.map((r,ri)=>(
+                        <span key={ri} style={{background:`${d.color}10`,border:`1px solid ${d.color}20`,borderRadius:3,padding:"1px 5px",fontSize:8,color:d.color}}>{r}</span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Backend layer */}
+            <div style={{display:"flex",justifyContent:"center"}}>
+              <div style={{width:1,height:20,background:"linear-gradient(180deg,rgba(99,102,241,0.4),rgba(8,145,178,0.6))"}}/>
+            </div>
+            <div style={{background:"linear-gradient(135deg,rgba(8,145,178,0.08),rgba(99,102,241,0.08))",border:"1px solid rgba(8,145,178,0.25)",borderRadius:10,padding:"12px 16px",textAlign:"center"}}>
+              <div style={{fontSize:9,color:"#0891b2",letterSpacing:"3px",marginBottom:8}}>⚙  BACKEND SYSTEMS — SHARED ACROSS ALL 4 DOMAINS</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:6,justifyContent:"center"}}>
+                {BACKEND.map(s=>(
+                  <div key={s.name} style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${s.color}30`,borderRadius:5,padding:"5px 10px",fontSize:10,color:"#94a3b8"}}>
+                    {s.icon} {s.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Middleware */}
+            <div style={{display:"flex",justifyContent:"center"}}>
+              <div style={{width:1,height:16,background:"rgba(99,102,241,0.3)"}}/>
+            </div>
+            <div style={{background:"rgba(99,102,241,0.06)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:8,padding:"10px 16px",display:"flex",gap:16,justifyContent:"center",alignItems:"center",flexWrap:"wrap"}}>
+              <span style={{fontSize:9,color:"#6366f1",letterSpacing:"2px"}}>⚡ MIDDLEWARE</span>
+              {["API Gateway (Kong)","Event Bus (Kafka)","Service Mesh (Istio)","Cloud (AWS)","Data Lake (Snowflake)"].map(m=>(
+                <span key={m} style={{fontSize:10,color:"#475569"}}>{m}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 2: DOMAINS ── */}
+        {tab==="domains" && (
+          <div className="fade-up">
+            <div style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+              {DOMAINS.map(x=>(
+                <button key={x.id} className="domain-btn" onClick={()=>{setDom(x.id);setOpenLayer(null);}}
+                  style={{background:dom===x.id?`${x.color}20`:"rgba(255,255,255,0.03)",border:`1px solid ${dom===x.id?x.color:"rgba(255,255,255,0.08)"}`,borderRadius:8,padding:"9px 16px",cursor:"pointer",fontFamily:"inherit",color:dom===x.id?x.color:"#475569",fontSize:11,fontWeight:dom===x.id?600:400,transition:"all 0.2s"}}>
+                  {x.icon} {x.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{background:`linear-gradient(135deg,${d.color}12,transparent)`,border:`1px solid ${d.color}30`,borderLeft:`4px solid ${d.color}`,borderRadius:10,padding:"18px 22px",marginBottom:18}}>
+              <div style={{display:"flex",gap:14,alignItems:"flex-start"}}>
+                <div style={{fontSize:36}}>{d.icon}</div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:9,color:d.color,letterSpacing:"2px",marginBottom:3}}>DOMAIN {d.num}</div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,color:"#fff",marginBottom:5}}>{d.label}</div>
+                  <div style={{color:"#64748b",fontSize:12,lineHeight:1.8}}>{d.desc}</div>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:8,marginTop:14,flexWrap:"wrap"}}>
+                {d.kpis.map((k,i)=>(
+                  <div key={i} style={{background:`${d.color}12`,border:`1px solid ${d.color}25`,borderRadius:5,padding:"5px 10px",fontSize:10,color:d.color}}>📊 {k}</div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))",gap:10}}>
+              {d.layers.map((l,li)=>(
+                <div key={li} className="layer-card" onClick={()=>setOpenLayer(openLayer===li?null:li)}
+                  style={{background:"#0b0f1e",border:`1px solid ${openLayer===li?d.color:"rgba(255,255,255,0.06)"}`,borderRadius:10,padding:"14px",cursor:"pointer",transition:"all 0.2s"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+                    <div style={{fontSize:12,fontWeight:600,color:d.color}}>{l.name}</div>
+                    <div style={{width:18,height:18,borderRadius:"50%",background:`${d.color}20`,border:`1px solid ${d.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,color:d.color}}>
+                      {openLayer===li?"−":"+"}
+                    </div>
+                  </div>
+                  {l.items.map((item,ii)=>(
+                    <div key={ii} style={{display:"flex",gap:6,alignItems:"flex-start",marginBottom:5}}>
+                      <span style={{color:d.color,fontSize:8,marginTop:4,flexShrink:0}}>▶</span>
+                      <span style={{fontSize:11,color:openLayer===li?"#94a3b8":"#64748b",lineHeight:1.6}}>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+
+            <div style={{background:"rgba(0,0,0,0.3)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:8,padding:"12px 16px",marginTop:14}}>
+              <div style={{fontSize:9,color:"#334155",letterSpacing:"1.5px",marginBottom:8,textTransform:"uppercase"}}>Regulatory Framework</div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {d.regs.map((r,i)=>(
+                  <span key={i} style={{background:`${d.color}10`,border:`1px solid ${d.color}30`,borderRadius:4,padding:"3px 8px",fontSize:11,color:d.color}}>{r}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 3: PORTICO ── */}
+        {tab==="portico" && (
+          <div className="fade-up">
+            <div style={{background:"linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08))",border:"1px solid rgba(99,102,241,0.3)",borderRadius:14,padding:"28px 32px",marginBottom:24,boxShadow:"0 0 60px rgba(99,102,241,0.08)"}}>
+              <div style={{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap"}}>
+                <div style={{width:64,height:64,borderRadius:16,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 8px 30px rgba(99,102,241,0.4)"}}>⚡</div>
+                <div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:"#a5b4fc"}}>PORTICO</div>
+                  <div style={{color:"#64748b",fontSize:12,marginTop:4,lineHeight:1.8}}>
+                    The Relationship Manager & Advisor's digital workstation.<br/>
+                    Portico is the <strong style={{color:"#818cf8"}}>front door</strong> to the entire banking architecture — every domain flows through it.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{color:"#475569",fontSize:10,letterSpacing:"2px",marginBottom:14,textTransform:"uppercase"}}>Portico's Role in Each Domain</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,marginBottom:24}}>
+              {DOMAINS.map(x=>(
+                <div key={x.id} style={{background:"#0b0f1e",border:`1px solid ${x.color}25`,borderLeft:`3px solid ${x.color}`,borderRadius:8,padding:"14px"}}>
+                  <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:8}}>
+                    <span style={{fontSize:18}}>{x.icon}</span>
+                    <span style={{color:x.color,fontSize:11,fontWeight:600}}>Domain {x.num}: {x.label}</span>
+                  </div>
+                  <div style={{color:"#64748b",fontSize:11,lineHeight:1.8}}>
+                    {x.id==="onboarding"&&"RM opens Portico → starts new client profile → triggers KYC checks in background → sees real-time pass/fail status → completes onboarding checklist → account opens in CBS automatically."}
+                    {x.id==="product"&&"RM sees 'Next Best Product' for each client → runs eligibility check → launches product application inside Portico → client e-signs disclosures → account provisioned and visible to client in digital banking."}
+                    {x.id==="wires"&&"RM monitors all client wire + ACH activity in one view → sees exceptions and pending approvals → escalates fraud flags to ops team → gives client live wire status updates without calling back-office."}
+                    {x.id==="retention"&&"RM sees churn risk score for each client → gets proactive life-event alerts → launches retention campaign from within Portico → logs interaction in CRM → tracks relationship P&L over time."}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{color:"#475569",fontSize:10,letterSpacing:"2px",marginBottom:14,textTransform:"uppercase"}}>Portico Core Features</div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,marginBottom:24}}>
+              {PORTICO_FEATURES.map((f,i)=>(
+                <div key={i} className="feature-card" style={{background:"#0b0f1e",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"14px"}}>
+                  <div style={{fontSize:22,marginBottom:7}}>{f.icon}</div>
+                  <div style={{color:"#818cf8",fontSize:12,fontWeight:600,marginBottom:5}}>{f.title}</div>
+                  <div style={{color:"#64748b",fontSize:11,lineHeight:1.7}}>{f.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:10,padding:"18px 22px"}}>
+              <div style={{color:"#10b981",fontSize:9,letterSpacing:"2px",marginBottom:8}}>🎯  YOUR PROJECT GOAL</div>
+              <p style={{color:"#94a3b8",fontSize:12,lineHeight:1.9}}>
+                <strong style={{color:"#6ee7b7"}}>Smoothen the Client Onboarding Journey through Portico.</strong>{" "}
+                Reduce Time-to-Funded-Account, increase KYC auto-approval rates, eliminate RM manual steps through orchestration,
+                and build a seamless guided onboarding flow that gives the RM real-time visibility at every step —
+                so the client feels like their bank is <em>on top of things</em>.
+              </p>
+              <div style={{display:"flex",gap:7,marginTop:12,flexWrap:"wrap"}}>
+                {["Reduce onboarding drop-off","Automate KYC orchestration","Real-time RM visibility","Guided step-by-step workflow","Faster time-to-funded account"].map(g=>(
+                  <span key={g} style={{background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)",borderRadius:4,padding:"3px 9px",fontSize:9,color:"#10b981"}}>✓ {g}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── TAB 4: BACKEND ── */}
+        {tab==="backend" && (
+          <div className="fade-up">
+            <p style={{color:"#475569",fontSize:12,lineHeight:1.8,marginBottom:18}}>
+              These are the backend systems that power all 4 domains. Portico connects to every one via the API Gateway. Think of these as the Flipkart equivalents of ERP, CRM, Catalog, OMS — but for a bank.
+            </p>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,marginBottom:24}}>
+              {BACKEND.map((s,i)=>(
+                <div key={i} className="sys-card" style={{background:"#0b0f1e",border:`1px solid ${s.color}25`,borderTop:`3px solid ${s.color}`,borderRadius:10,padding:"14px"}}>
+                  <div style={{fontSize:22,marginBottom:7}}>{s.icon}</div>
+                  <div style={{color:s.color,fontSize:12,fontWeight:600,marginBottom:5}}>{s.name}</div>
+                  <div style={{color:"#64748b",fontSize:11,lineHeight:1.7}}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{background:"#0b0f1e",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,overflow:"hidden",marginBottom:16}}>
+              <div style={{background:"linear-gradient(135deg,rgba(99,102,241,0.15),rgba(16,185,129,0.08))",padding:"12px 18px",borderBottom:"1px solid rgba(255,255,255,0.05)"}}>
+                <span style={{color:"#818cf8",fontSize:12,fontWeight:600}}>🔁 Flipkart → Banking Equivalent (Mental Model)</span>
+              </div>
+              <div style={{padding:"6px"}}>
+                {FKMAP.map(([fk,bk,note],i)=>(
+                  <div key={i} style={{display:"grid",gridTemplateColumns:"1fr 1fr 1.2fr",gap:8,padding:"8px 10px",background:i%2===0?"rgba(255,255,255,0.02)":"transparent",borderRadius:4}}>
+                    <div style={{fontSize:10,color:"#10b981"}}>{fk}</div>
+                    <div style={{fontSize:10,color:"#818cf8"}}>{bk}</div>
+                    <div style={{fontSize:9,color:"#475569",fontStyle:"italic"}}>{note}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div style={{background:"rgba(99,102,241,0.06)",border:"1px solid rgba(99,102,241,0.2)",borderRadius:8,padding:"14px 18px"}}>
+              <div style={{color:"#6366f1",fontSize:9,letterSpacing:"2px",marginBottom:10}}>⚡ MIDDLEWARE — THE GLUE</div>
+              <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                {[
+                  ["API Gateway (Kong)","Central entry. JWT auth, rate limiting, routing for Portico + all consumers."],
+                  ["Event Bus (Apache Kafka)","Async messaging: onboarding events, payment events, alert triggers."],
+                  ["Service Mesh (Istio)","mTLS, circuit breakers, distributed tracing across 500+ microservices."],
+                  ["Cloud (AWS)","EKS containers, S3 documents, RDS data, CloudWatch monitoring."],
+                  ["Data Lake (Snowflake)","Analytics truth. Powers churn ML, fraud models, regulatory reporting."],
+                ].map(([name,desc],i)=>(
+                  <div key={i} style={{background:"rgba(0,0,0,0.3)",borderRadius:6,padding:"9px 12px",border:"1px solid rgba(99,102,241,0.15)",flex:"1 1 160px"}}>
+                    <div style={{fontSize:11,color:"#818cf8",fontWeight:600,marginBottom:3}}>{name}</div>
+                    <div style={{fontSize:10,color:"#475569",lineHeight:1.6}}>{desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
