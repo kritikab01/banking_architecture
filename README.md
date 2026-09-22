@@ -2,7 +2,7 @@
 
 **An interactive reference architecture of a modern commercial bank's client journey — the four domains that structure the work, the RM-facing platform that sits on top, and the vendor stack that powers it.**
 
-🔗 **[Live App]((https://commercial-banking-architecture.streamlit.app/)** · Built with React + Streamlit
+🔗 **[Live App](https://commercial-banking-architecture.streamlit.app/)** · Built with React + Streamlit
 
 ![Architecture map](docs/screenshot-map.png)
 
