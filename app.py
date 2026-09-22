@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="Portico · Banking Architecture",
+    page_title="Commercial Banking · Client Journey Architecture",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="collapsed"
