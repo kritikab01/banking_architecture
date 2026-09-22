@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Portico · Banking Architecture</title>
+<title>Commercial Banking · Client Journey Architecture</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
@@ -37,9 +37,9 @@ const DOMAINS = [
     id:"onboarding",num:"01",label:"Client Onboarding",icon:"👤",
     color:"#10b981",glow:"rgba(16,185,129,0.25)",
     tagline:"Who is the customer?",
-    desc:"The bank's first and most regulated domain. KYC, KYB, EDD — Portico orchestrates the full identity and compliance journey for the RM.",
+    desc:"The bank's first and most regulated domain. KYC, KYB, EDD — The RM Platform orchestrates the full identity and compliance journey for the RM.",
     layers:[
-      {name:"Digital Front Door (Portico)",items:["RM/Advisor Login Dashboard","Client Profile Creation","Document Upload Portal","Application Progress Tracker","Onboarding Checklist"]},
+      {name:"Digital Front Door (RM Platform)",items:["RM/Advisor Login Dashboard","Client Profile Creation","Document Upload Portal","Application Progress Tracker","Onboarding Checklist"]},
       {name:"Identity & Verification",items:["KYC — Individual (Retail)","KYB — Business Entity (Commercial)","EDD — Enhanced Due Diligence","Beneficial Ownership (FinCEN CDD)","PEP / Adverse Media Screening"]},
       {name:"Compliance & Risk",items:["OFAC / Sanctions Screening","AML Risk Scoring (Low/Med/High)","ChexSystems / EWS (Retail)","SOS Entity Verification (Biz)","Customer Risk Rating (CRR)"]},
       {name:"Systems",items:["Jumio / Socure / Persona (ID Verify)","Alloy / Unit21 (KYC Orchestration)","ComplyAdvantage (Sanctions)","NICE Actimize (AML)","Middesk / D&B (KYB)"]},
@@ -51,10 +51,10 @@ const DOMAINS = [
     id:"product",num:"02",label:"Product Onboarding",icon:"📦",
     color:"#3b82f6",glow:"rgba(59,130,246,0.25)",
     tagline:"What does the customer need?",
-    desc:"Two tracks: Bank creates & configures the product (Track A), then the RM guides the customer to the right product through Portico (Track B).",
+    desc:"Two tracks: Bank creates & configures the product (Internal Track), then the RM guides the customer to the right product through the RM Platform (Client-Facing Track).",
     layers:[
-      {name:"Track A — Bank Product Creation",items:["Product Concept & PRD","Regulatory Approval (OCC)","ALCO Pricing Committee","Core Banking Configuration","Digital Build & Ops Readiness"]},
-      {name:"Track B — Customer Journey via Portico",items:["Needs Assessment by RM","Product Recommendation Engine","Eligibility & Pre-Qualification","Application & Underwriting","E-Sign + Disclosure (TILA/Reg E)"]},
+      {name:"Internal Track — Bank Product Creation",items:["Product Concept & PRD","Regulatory Approval (OCC)","ALCO Pricing Committee","Core Banking Configuration","Digital Build & Ops Readiness"]},
+      {name:"Client-Facing Journey",items:["Needs Assessment by RM","Product Recommendation Engine","Eligibility & Pre-Qualification","Application & Underwriting","E-Sign + Disclosure (TILA/Reg E)"]},
       {name:"All Banking Verticals",items:["Retail: Checking, Savings, MMA, CD","Cards: Secured / Rewards / Premium / Co-brand","Loans: Personal, Auto, Mortgage, Student","Commercial: C&I, CRE, SBA, ABL, Trade Finance","Wealth: Advisory, Brokerage, Trust, Annuities"]},
       {name:"Systems",items:["nCino (Loan Origination)","Encompass / Blend (Mortgage)","MeridianLink (Decisioning)","DocuSign (E-Sign)","Temenos / FIS (Core Banking Config)"]},
     ],
@@ -65,7 +65,7 @@ const DOMAINS = [
     id:"wires",num:"03",label:"Wires & Payments",icon:"⚡",
     color:"#f59e0b",glow:"rgba(245,158,11,0.25)",
     tagline:"How does money move?",
-    desc:"Every dollar moving in or out uses one of 8+ rails. Portico gives RMs real-time visibility into client payment activity, wire status, and exceptions.",
+    desc:"Every dollar moving in or out uses one of 8+ rails. The RM Platform gives RMs real-time visibility into client payment activity, wire status, and exceptions.",
     layers:[
       {name:"Outgoing (Originated by Bank)",items:["Fedwire (RTGS — Large Value, Irrevocable)","ACH Standard (T+1, Payroll/Vendor)","Same-Day ACH (3 windows: 10:30/2:45/4:45 ET)","RTP / FedNow (Instant, < 10 seconds)","SWIFT MT103 (International via Nostro/Vostro)"]},
       {name:"Incoming (Received by Bank)",items:["Fedwire Receipt → Fed Master Account","ACH Credit (RDFI — Direct Deposit)","SWIFT Incoming MT103 → Validate → Post","RTP / FedNow Incoming (Instant Credit)","Check 21 / Remote Deposit Capture"]},
@@ -80,9 +80,9 @@ const DOMAINS = [
     id:"retention",num:"04",label:"Retention & Exit",icon:"🔄",
     color:"#8b5cf6",glow:"rgba(139,92,246,0.25)",
     tagline:"How do we keep clients & manage liquidity?",
-    desc:"Two meanings: keeping customers loyal (CRM + NBA), and keeping the bank solvent when deposits leave (ALM + LCR). Both are Portico use cases.",
+    desc:"Two meanings: keeping customers loyal (CRM + NBA), and keeping the bank solvent when deposits leave (ALM + LCR). Both are RM Platform use cases.",
     layers:[
-      {name:"Customer Retention (RM Tools in Portico)",items:["Churn Prediction Score (ML, monthly)","Next Best Action (NBA) Engine","Relationship Profitability Dashboard","Life Event Triggers (Marriage/Home/Retirement)","NPS Survey + Detractor Escalation"]},
+      {name:"Customer Retention (RM Tools in the RM Platform)",items:["Churn Prediction Score (ML, monthly)","Next Best Action (NBA) Engine","Relationship Profitability Dashboard","Life Event Triggers (Marriage/Home/Retirement)","NPS Survey + Detractor Escalation"]},
       {name:"Cross-Sell & Deepening",items:["Product Recommendation by Life Stage","Proactive Rate Match Offers","Digital Upgrade Nudges (Free → Premium)","RM Outreach Triggers (Low App Login)","Loyalty: Relationship Pricing + Rewards"]},
       {name:"Liquidity Management (Bank-Side)",items:["LCR (Liquidity Coverage Ratio > 100%)","NSFR (Net Stable Funding Ratio > 100%)","Deposit Concentration Monitoring","ALM / ALCO Stress Testing","FHLB / Fed Discount Window Access"]},
       {name:"Exit / Account Closure",items:["Voluntary Exit: Save Offer → Retention Attempt","Balance Disbursement (ACH / Wire / Check)","Account Closure in CBS (7-yr data retention)","SAR Filing if AML-triggered exit","Win-Back Campaign (6 months post-closure)"]},
@@ -99,7 +99,7 @@ const BACKEND = [
   {name:"ERP — SAP S/4HANA",icon:"📊",desc:"Finance: GL, AP/AR, GST. Procurement. Supply chain. HR & Payroll. Financial reporting.",color:"#7c3aed"},
   {name:"KYC/AML Platform",icon:"🔒",desc:"NICE Actimize / Oracle FCCM. Transaction monitoring, SAR/CTR, OFAC screening, case mgmt.",color:"#b91c1c"},
   {name:"Payment Hub",icon:"⚡",desc:"Temenos Payments / ACI. Central routing for all rails: ACH, Fedwire, SWIFT, RTP, FedNow.",color:"#b45309"},
-  {name:"Digital Banking Platform",icon:"📱",desc:"Q2 / Backbase. Customer-facing web + mobile. Portico is the RM-facing counterpart.",color:"#15803d"},
+  {name:"Digital Banking Platform",icon:"📱",desc:"Q2 / Backbase. Customer-facing web + mobile. The RM Platform is the RM-facing counterpart.",color:"#15803d"},
   {name:"Loan Origination (LOS)",icon:"📋",desc:"nCino (commercial) + Encompass (mortgage). Full loan lifecycle from application to closing.",color:"#0f766e"},
   {name:"Data & ML Platform",icon:"🧠",desc:"Snowflake + Databricks. Churn prediction, fraud models, NBA engine, regulatory reporting.",color:"#9d174d"},
   {name:"API Gateway",icon:"🔌",desc:"Kong / AWS API GW. Central entry for all systems + fintech partners. Auth, rate limit, routing.",color:"#334155"},
@@ -114,14 +114,14 @@ const FKMAP = [
   ["🛒 Flipkart OMS","🏦 Loan Origination System (LOS)","Application → Underwriting → Approval → Funding"],
   ["🛒 Flipkart Payment Gateway","🏦 Payment Hub (Fedwire/ACH/SWIFT)","Money movement across all rails"],
   ["🛒 Flipkart Fraud Detection","🏦 AML/KYC Platform (Actimize)","Real-time risk: fraud + compliance + sanctions"],
-  ["🛒 Flipkart Notifications","🏦 CRM + Portico Alerts","Proactive RM and client alerts for all events"],
-  ["🛒 Flipkart API Gateway","🏦 Banking API Gateway (Kong)","Central entry for Portico + all integrations"],
+  ["🛒 Flipkart Notifications","🏦 CRM + In-app Alerts","Proactive RM and client alerts for all events"],
+  ["🛒 Flipkart API Gateway","🏦 Banking API Gateway (Kong)","Central entry for the RM Platform + all integrations"],
   ["🛒 Flipkart Data Platform","🏦 Snowflake + Databricks","Analytics, ML models, regulatory reporting"],
-  ["🛒 Flipkart Seller Hub","🏦 Portico (RM Dashboard)","The internal operator's command centre"],
+  ["🛒 Flipkart Seller Hub","🏦 RM Platform Dashboard","The internal operator's command centre"],
   ["🛒 Flipkart Ekart","🏦 Treasury Ops (Payments)","Physically moving value — securely, at scale"],
 ];
 
-const PORTICO_FEATURES = [
+const RM_FEATURES = [
   {icon:"👤",title:"Client Profile Hub",desc:"360° view of every client: products, KYC status, risk rating, interaction history, documents, next best actions — all in one screen for the RM."},
   {icon:"✅",title:"Onboarding Orchestrator",desc:"Step-by-step guided onboarding workflow. KYC checks fire in the background. RM sees real-time status: ID verified ✓, sanctions clean ✓, risk rated ✓."},
   {icon:"📦",title:"Product Recommendation",desc:"ML-powered product suggester based on client life stage, financial profile, and relationship gaps. RM gets 'Next Best Product' with rationale."},
@@ -139,7 +139,7 @@ function App() {
   const tabs = [
     {id:"map",label:"🗺  Architecture Map"},
     {id:"domains",label:"🔍  4 Domains Deep Dive"},
-    {id:"portico",label:"⚡  Portico — RM App"},
+    {id:"platform",label:"⚡  RM Platform Features"},
     {id:"backend",label:"🏗  Backend Systems"},
   ];
 
@@ -151,10 +151,10 @@ function App() {
           <div>
             <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:2}}>
               <div style={{width:7,height:7,borderRadius:"50%",background:"#10b981",boxShadow:"0 0 10px #10b981",animation:"pulse 2.5s infinite"}}/>
-              <span style={{color:"#10b981",fontSize:9,letterSpacing:"3px",textTransform:"uppercase"}}>Product Intern · Mentor Session</span>
+              <span style={{color:"#10b981",fontSize:9,letterSpacing:"3px",textTransform:"uppercase"}}>Reference Architecture · Educational Synthesis</span>
             </div>
             <div style={{fontFamily:"'Syne',sans-serif",fontSize:20,fontWeight:800,background:"linear-gradient(90deg,#fff 40%,#6366f1)",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
-              Banking Architecture · Portico
+              Commercial Banking · Client Journey Architecture
             </div>
           </div>
           <div style={{background:"rgba(99,102,241,0.1)",border:"1px solid rgba(99,102,241,0.3)",borderRadius:6,padding:"5px 12px",fontSize:10,color:"#818cf8",letterSpacing:"0.5px"}}>
@@ -180,11 +180,11 @@ function App() {
         {/* ── TAB 1: MAP ── */}
         {tab==="map" && (
           <div className="fade-up">
-            {/* Portico box */}
+            {/* the RM Platform box */}
             <div style={{textAlign:"center",marginBottom:20}}>
               <div style={{display:"inline-block",background:"linear-gradient(135deg,rgba(99,102,241,0.15),rgba(139,92,246,0.1))",border:"2px solid rgba(99,102,241,0.5)",borderRadius:14,padding:"16px 40px",boxShadow:"0 0 40px rgba(99,102,241,0.15)"}}>
                 <div style={{fontSize:26,marginBottom:4}}>⚡</div>
-                <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#818cf8",letterSpacing:1}}>PORTICO</div>
+                <div style={{fontFamily:"'Syne',sans-serif",fontSize:18,fontWeight:800,color:"#818cf8",letterSpacing:1}}>RM PLATFORM</div>
                 <div style={{fontSize:10,color:"#475569",marginTop:2,letterSpacing:"1.5px"}}>RM & ADVISOR DIGITAL ONBOARDING APP</div>
                 <div style={{display:"flex",gap:6,justifyContent:"center",marginTop:8,flexWrap:"wrap"}}>
                   {["Client 360","KYC Orchestrator","Product Recommender","Payment Monitor","Retention Alerts"].map(f=>(
@@ -326,23 +326,23 @@ function App() {
           </div>
         )}
 
-        {/* ── TAB 3: PORTICO ── */}
-        {tab==="portico" && (
+        {/* ── TAB 3: RM PLATFORM ── */}
+        {tab==="platform" && (
           <div className="fade-up">
             <div style={{background:"linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.08))",border:"1px solid rgba(99,102,241,0.3)",borderRadius:14,padding:"28px 32px",marginBottom:24,boxShadow:"0 0 60px rgba(99,102,241,0.08)"}}>
               <div style={{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap"}}>
                 <div style={{width:64,height:64,borderRadius:16,background:"linear-gradient(135deg,#6366f1,#8b5cf6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:28,boxShadow:"0 8px 30px rgba(99,102,241,0.4)"}}>⚡</div>
                 <div>
-                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:"#a5b4fc"}}>PORTICO</div>
+                  <div style={{fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:"#a5b4fc"}}>RM PLATFORM</div>
                   <div style={{color:"#64748b",fontSize:12,marginTop:4,lineHeight:1.8}}>
                     The Relationship Manager & Advisor's digital workstation.<br/>
-                    Portico is the <strong style={{color:"#818cf8"}}>front door</strong> to the entire banking architecture — every domain flows through it.
+                    The RM Platform is the <strong style={{color:"#818cf8"}}>front door</strong> to the entire banking architecture — every domain flows through it.
                   </div>
                 </div>
               </div>
             </div>
 
-            <div style={{color:"#475569",fontSize:10,letterSpacing:"2px",marginBottom:14,textTransform:"uppercase"}}>Portico's Role in Each Domain</div>
+            <div style={{color:"#475569",fontSize:10,letterSpacing:"2px",marginBottom:14,textTransform:"uppercase"}}>The RM Platform's Role in Each Domain</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:10,marginBottom:24}}>
               {DOMAINS.map(x=>(
                 <div key={x.id} style={{background:"#0b0f1e",border:`1px solid ${x.color}25`,borderLeft:`3px solid ${x.color}`,borderRadius:8,padding:"14px"}}>
@@ -351,18 +351,18 @@ function App() {
                     <span style={{color:x.color,fontSize:11,fontWeight:600}}>Domain {x.num}: {x.label}</span>
                   </div>
                   <div style={{color:"#64748b",fontSize:11,lineHeight:1.8}}>
-                    {x.id==="onboarding"&&"RM opens Portico → starts new client profile → triggers KYC checks in background → sees real-time pass/fail status → completes onboarding checklist → account opens in CBS automatically."}
-                    {x.id==="product"&&"RM sees 'Next Best Product' for each client → runs eligibility check → launches product application inside Portico → client e-signs disclosures → account provisioned and visible to client in digital banking."}
+                    {x.id==="onboarding"&&"RM opens RM Platform → starts new client profile → triggers KYC checks in background → sees real-time pass/fail status → completes onboarding checklist → account opens in CBS automatically."}
+                    {x.id==="product"&&"RM sees 'Next Best Product' for each client → runs eligibility check → launches product application inside RM Platform → client e-signs disclosures → account provisioned and visible to client in digital banking."}
                     {x.id==="wires"&&"RM monitors all client wire + ACH activity in one view → sees exceptions and pending approvals → escalates fraud flags to ops team → gives client live wire status updates without calling back-office."}
-                    {x.id==="retention"&&"RM sees churn risk score for each client → gets proactive life-event alerts → launches retention campaign from within Portico → logs interaction in CRM → tracks relationship P&L over time."}
+                    {x.id==="retention"&&"RM sees churn risk score for each client → gets proactive life-event alerts → launches retention campaign from within RM Platform → logs interaction in CRM → tracks relationship P&L over time."}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div style={{color:"#475569",fontSize:10,letterSpacing:"2px",marginBottom:14,textTransform:"uppercase"}}>Portico Core Features</div>
+            <div style={{color:"#475569",fontSize:10,letterSpacing:"2px",marginBottom:14,textTransform:"uppercase"}}>RM Platform Core Features</div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,marginBottom:24}}>
-              {PORTICO_FEATURES.map((f,i)=>(
+              {RM_FEATURES.map((f,i)=>(
                 <div key={i} className="feature-card" style={{background:"#0b0f1e",border:"1px solid rgba(255,255,255,0.06)",borderRadius:10,padding:"14px"}}>
                   <div style={{fontSize:22,marginBottom:7}}>{f.icon}</div>
                   <div style={{color:"#818cf8",fontSize:12,fontWeight:600,marginBottom:5}}>{f.title}</div>
@@ -374,7 +374,7 @@ function App() {
             <div style={{background:"rgba(16,185,129,0.06)",border:"1px solid rgba(16,185,129,0.25)",borderRadius:10,padding:"18px 22px"}}>
               <div style={{color:"#10b981",fontSize:9,letterSpacing:"2px",marginBottom:8}}>🎯  YOUR PROJECT GOAL</div>
               <p style={{color:"#94a3b8",fontSize:12,lineHeight:1.9}}>
-                <strong style={{color:"#6ee7b7"}}>Smoothen the Client Onboarding Journey through Portico.</strong>{" "}
+                <strong style={{color:"#6ee7b7"}}>Smoothen the Client Onboarding Journey through the RM Platform.</strong>{" "}
                 Reduce Time-to-Funded-Account, increase KYC auto-approval rates, eliminate RM manual steps through orchestration,
                 and build a seamless guided onboarding flow that gives the RM real-time visibility at every step —
                 so the client feels like their bank is <em>on top of things</em>.
@@ -392,7 +392,7 @@ function App() {
         {tab==="backend" && (
           <div className="fade-up">
             <p style={{color:"#475569",fontSize:12,lineHeight:1.8,marginBottom:18}}>
-              These are the backend systems that power all 4 domains. Portico connects to every one via the API Gateway. Think of these as the Flipkart equivalents of ERP, CRM, Catalog, OMS — but for a bank.
+              These are the backend systems that power all 4 domains. The RM Platform connects to every backend via the API Gateway. Think of these as the Flipkart equivalents of ERP, CRM, Catalog, OMS — but for a bank.
             </p>
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:10,marginBottom:24}}>
               {BACKEND.map((s,i)=>(
@@ -423,7 +423,7 @@ function App() {
               <div style={{color:"#6366f1",fontSize:9,letterSpacing:"2px",marginBottom:10}}>⚡ MIDDLEWARE — THE GLUE</div>
               <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
                 {[
-                  ["API Gateway (Kong)","Central entry. JWT auth, rate limiting, routing for Portico + all consumers."],
+                  ["API Gateway (Kong)","Central entry. JWT auth, rate limiting, routing for the RM Platform + all consumers."],
                   ["Event Bus (Apache Kafka)","Async messaging: onboarding events, payment events, alert triggers."],
                   ["Service Mesh (Istio)","mTLS, circuit breakers, distributed tracing across 500+ microservices."],
                   ["Cloud (AWS)","EKS containers, S3 documents, RDS data, CloudWatch monitoring."],
